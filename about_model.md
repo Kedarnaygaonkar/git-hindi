@@ -1,16 +1,3 @@
-.
-
-🧠 KEDAR - Model Training & Optimization (Detailed)
-Role: Machine Learning Engineer & Model Trainer
-🎯 OVERVIEW
-Kedar is responsible for the core AI/ML work - training the neural network to detect bone fractures. His work involves:
-
-Selecting and configuring the model architecture
-Training the model on the dataset
-Optimizing hyperparameters
-Monitoring training progress
-Saving the trained model
-Contribution: 25% of the project (highest contribution)
 
 📚 PART 1: Understanding Transfer Learning
 A. What is Transfer Learning?
