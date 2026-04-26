@@ -1,6 +1,8 @@
+## 📚 **PART 1: Understanding Transfer Learning**
 
-📚 PART 1: Understanding Transfer Learning
-A. What is Transfer Learning?
+### **A. What is Transfer Learning?**
+
+```python
 # Transfer Learning Concept
 
 # Traditional Training (from scratch):
@@ -13,7 +15,11 @@ model = YOLO('yolov8s.pt')         # Pre-trained on COCO dataset
                                     # Already knows: edges, shapes, objects
 model.train(fracture_dataset)       # Fine-tune for fractures
 # Benefit: Needs fewer images, trains in hours
-B. YOLOv8s Pre-trained Model
+```
+
+### **B. YOLOv8s Pre-trained Model**
+
+```python
 # What Kedar downloaded
 from ultralytics import YOLO
 
@@ -32,7 +38,11 @@ model = YOLO('yolov8s.pt')  # 's' = small variant
 # ✅ Texture patterns
 # ✅ Object localization
 # ✅ Bounding box prediction
-C. Why YOLOv8s?
+```
+
+### **C. Why YOLOv8s?**
+
+```python
 # Kedar's model selection reasoning:
 
 # Option 1: YOLOv8n (nano) - 3.2M parameters
@@ -51,8 +61,15 @@ C. Why YOLOv8s?
 
 # Option 5: YOLOv8x (extra large) - 68.2M parameters
 # ❌ Very slow, requires powerful GPU
-🏗️ PART 2: Model Architecture Understanding
-A. YOLOv8 Architecture Layers
+```
+
+---
+
+## 🏗️ **PART 2: Model Architecture Understanding**
+
+### **A. YOLOv8 Architecture Layers**
+
+```python
 # From training output - Kedar analyzed this structure
 
 # INPUT LAYER
@@ -88,7 +105,11 @@ Layer 21: C2f [768, 512, 1]       # Fuse
 Layer 22: Detect [7, [128, 256, 512]]  # Predict 7 classes at 3 scales
 
 # TOTAL: 225 layers, 11,138,309 parameters
-B. What Each Component Does
+```
+
+### **B. What Each Component Does**
+
+```python
 # Kedar's understanding of architecture components:
 
 # 1. CONVOLUTIONAL LAYERS (Conv)
@@ -132,7 +153,11 @@ Purpose: Final predictions (boxes + classes)
 Output: Bounding boxes + class probabilities + confidence
 Classes: 7 fracture types
 """
-C. Model Parameter Breakdown
+```
+
+### **C. Model Parameter Breakdown**
+
+```python
 # Total Parameters: 11,138,309
 
 # Breakdown:
@@ -147,8 +172,15 @@ C. Model Parameter Breakdown
 
 # Memory requirement:
 # 11,138,309 parameters × 4 bytes (float32) = ~42 MB
-🎓 PART 3: Training Configuration
-A. Training Command
+```
+
+---
+
+## 🎓 **PART 3: Training Configuration**
+
+### **A. Training Command**
+
+```python
 # Kedar's training code (from yolo_model.ipynb)
 
 from ultralytics import YOLO
@@ -164,8 +196,13 @@ model.train(
     imgsz=416,       # Image size (416×416)
     amp=True         # Automatic Mixed Precision (faster training)
 )
-B. Hyperparameter Explanation
-1. Epochs = 100
+```
+
+### **B. Hyperparameter Explanation**
+
+#### **1. Epochs = 100**
+
+```python
 # What is an epoch?
 # One complete pass through the entire training dataset
 
@@ -186,7 +223,11 @@ Batches per epoch: 3,631 / 16 = 227 batches
 # ~4 seconds per batch × 227 batches = ~15 minutes per epoch
 # 100 epochs × 15 minutes = ~25 hours total (on CPU)
 # On GPU: ~2-3 hours
-2. Batch Size = 16
+```
+
+#### **2. Batch Size = 16**
+
+```python
 # What is batch size?
 # Number of images processed together before updating weights
 
@@ -216,7 +257,11 @@ for epoch in range(100):
 
 # Memory usage:
 # 16 images × 416×416×3 × 4 bytes = ~33 MB per batch
-3. Image Size = 416
+```
+
+#### **3. Image Size = 416**
+
+```python
 # Why 416×416?
 
 # Original X-ray sizes: Variable (e.g., 640×480, 800×600)
@@ -236,7 +281,11 @@ resized_image = resize(original_image, (416, 416))  # Square
 # - 320×320: Faster, less accurate
 # - 416×416: Balanced ✅ (Kedar's choice)
 # - 640×640: More accurate, slower
-4. AMP = True (Automatic Mixed Precision)
+```
+
+#### **4. AMP = True (Automatic Mixed Precision)**
+
+```python
 # What is AMP?
 
 # Traditional training (FP32):
@@ -274,8 +323,15 @@ if amp == True:
 # - Faster training (hours instead of days)
 # - Can use larger batch sizes
 # - No accuracy loss
-📊 PART 4: Training Process
-A. Training Loop Breakdown
+```
+
+---
+
+## 📊 **PART 4: Training Process**
+
+### **A. Training Loop Breakdown**
+
+```python
 # What happens during training (simplified)
 
 for epoch in range(1, 101):  # 100 epochs
@@ -320,7 +376,11 @@ for epoch in range(1, 101):  # 100 epochs
     if val_metrics.map50 > best_map50:
         save_model("best.pt")
         best_map50 = val_metrics.map50
-B. Loss Functions Explained
+```
+
+### **B. Loss Functions Explained**
+
+```python
 # Kedar monitored three types of loss:
 
 # 1. BOX LOSS (Localization Loss)
@@ -366,7 +426,11 @@ Goal: Minimize DFL loss → More precise boxes
 total_loss = box_loss + cls_loss + dfl_loss
 
 # Training objective: Minimize total loss
-C. Training Output Example
+```
+
+### **C. Training Output Example**
+
+```python
 # What Kedar saw during training:
 
 """
@@ -388,8 +452,15 @@ Results saved to runs/detect/train2
 # - cls_loss decreasing: Model learning to classify better
 # - dfl_loss decreasing: Model getting more confident
 # - Instances: Number of fractures in current batch
-⚙️ PART 5: Optimizer Configuration
-A. Automatic Optimizer Selection
+```
+
+---
+
+## ⚙️ **PART 5: Optimizer Configuration**
+
+### **A. Automatic Optimizer Selection**
+
+```python
 # From training output:
 """
 optimizer: 'optimizer=auto' found, ignoring 'lr0=0.01' and 'momentum=0.937' 
@@ -404,7 +475,11 @@ optimizer = "AdamW"           # Adaptive optimizer
 learning_rate = 0.000909      # How fast to learn
 momentum = 0.9                # Smoothing factor
 weight_decay = 0.0005         # Regularization
-B. What is AdamW Optimizer?
+```
+
+### **B. What is AdamW Optimizer?**
+
+```python
 # AdamW = Adam with Weight Decay
 
 # Traditional gradient descent:
@@ -431,7 +506,11 @@ new_weight = weight - adaptive_lr × velocity
 # ✅ Handles sparse gradients well
 # ✅ Converges faster than SGD
 # ✅ Better generalization with weight decay
-C. Learning Rate Schedule
+```
+
+### **C. Learning Rate Schedule**
+
+```python
 # Learning rate changes during training
 
 # Initial learning rate: 0.000909
@@ -453,8 +532,15 @@ def get_learning_rate(epoch, total_epochs=100):
 # Why this schedule?
 # - Warmup: Prevents unstable training at start
 # - Cosine: Helps model converge to better minimum
-💾 PART 6: Model Saving & Checkpointing
-A. Saved Model Files
+```
+
+---
+
+## 💾 **PART 6: Model Saving & Checkpointing**
+
+### **A. Saved Model Files**
+
+```python
 # After training, Kedar saved:
 
 # 1. Best model (highest validation mAP)
@@ -472,7 +558,11 @@ A. Saved Model Files
 
 # Final model copied to:
 "G2/models/model.pt"  # Used in production
-B. What's Inside model.pt?
+```
+
+### **B. What's Inside model.pt?**
+
+```python
 # model.pt contains:
 
 {
@@ -496,7 +586,11 @@ B. What's Inside model.pt?
 }
 
 # File size: ~22 MB
-C. Model Loading
+```
+
+### **C. Model Loading**
+
+```python
 # How the model is loaded later (in app.py)
 
 from ultralytics import YOLO
@@ -511,8 +605,15 @@ model = YOLO('models/model.pt')
 # 4. Ready for inference
 
 # Model is now ready to detect fractures!
-📈 PART 7: Training Monitoring & Validation
-A. Metrics Tracked During Training
+```
+
+---
+
+## 📈 **PART 7: Training Monitoring & Validation**
+
+### **A. Metrics Tracked During Training**
+
+```python
 # Kedar monitored these metrics:
 
 # TRAINING METRICS (per batch)
@@ -537,7 +638,11 @@ A. Metrics Tracked During Training
      shoulder fracture         15         16      0.589      0.188      0.253     0.0538
         wrist positive         13         22          0          0     0.0197    0.00518
 """
-B. Understanding mAP (Mean Average Precision)
+```
+
+### **B. Understanding mAP (Mean Average Precision)**
+
+```python
 # mAP is the PRIMARY metric for object detection
 
 # Calculation process:
@@ -576,7 +681,11 @@ mAP = mean(average_precisions)
 
 # mAP50 = mAP at IoU threshold 0.5
 # mAP50-95 = Average mAP from IoU 0.5 to 0.95 (step 0.05)
-C. Validation Results Interpretation
+```
+
+### **C. Validation Results Interpretation**
+
+```python
 # From Kedar's training:
 
 # Best performing classes:
@@ -595,8 +704,15 @@ C. Validation Results Interpretation
 # 2. Similar appearance to other classes (confusion)
 # 3. Small fractures hard to detect
 # 4. Need more training epochs or data augmentation
-🧠 PART 8: AI Concepts Applied by Kedar
-A. Intelligent Agents (Unit-I)
+```
+
+---
+
+## 🧠 **PART 8: AI Concepts Applied by Kedar**
+
+### **A. Intelligent Agents (Unit-I)**
+
+```python
 # The trained model IS an intelligent agent
 
 # AGENT COMPONENTS:
@@ -612,7 +728,11 @@ agent = {
 # RATIONAL BEHAVIOR:
 # Agent maximizes mAP by learning optimal weights
 # through gradient descent optimization
-B. Knowledge Representation (Unit-I)
+```
+
+### **B. Knowledge Representation (Unit-I)**
+
+```python
 # Neural network weights = KNOWLEDGE
 
 # PROCEDURAL KNOWLEDGE (How to detect fractures)
@@ -628,7 +748,11 @@ B. Knowledge Representation (Unit-I)
 # Method: Supervised learning from 3,631 labeled examples
 # Process: Gradient descent optimization
 # Duration: 100 epochs (~25 hours)
-C. Learning & Optimization
+```
+
+### **C. Learning & Optimization**
+
+```python
 # LEARNING ALGORITHM: Backpropagation + Gradient Descent
 
 # Simplified learning process:
@@ -650,7 +774,11 @@ for epoch in range(100):
         # Model gets smarter with each update!
 
 # This is MACHINE LEARNING in action
-D. Transfer Learning (Modern AI Concept)
+```
+
+### **D. Transfer Learning (Modern AI Concept)**
+
+```python
 # Kedar used TRANSFER LEARNING
 
 # Pre-trained knowledge (from COCO dataset):
@@ -666,34 +794,43 @@ D. Transfer Learning (Modern AI Concept)
 # - 7 specific fracture types
 
 # Benefit: Faster training, better accuracy with less data
-📊 PART 9: Kedar's Deliverables
-Final Outputs:
-✅ Trained Model
+```
 
-File: 
-model.pt
- (22 MB)
-Parameters: 11,138,309
-Performance: mAP50 = 0.281
-✅ Training Notebook
+---
 
-File: yolo_model.ipynb
-Contains: All training code
-Documented: Hyperparameters and results
-✅ Training Results
+## 📊 **PART 9: Kedar's Deliverables**
 
-Metrics per epoch
-Loss curves
-Validation predictions
-Performance analysis
-✅ Model Configuration
+### **Final Outputs:**
 
-Architecture: YOLOv8s
-Input size: 416×416
-Output: 7 classes
-Inference speed: ~10ms per image
-🎯 PART 10: Challenges Faced by Kedar
-A. Training Challenges
+1. ✅ **Trained Model**
+   - File: `models/model.pt` (22 MB)
+   - Parameters: 11,138,309
+   - Performance: mAP50 = 0.281
+
+2. ✅ **Training Notebook**
+   - File: `yolo_model.ipynb`
+   - Contains: All training code
+   - Documented: Hyperparameters and results
+
+3. ✅ **Training Results**
+   - Metrics per epoch
+   - Loss curves
+   - Validation predictions
+   - Performance analysis
+
+4. ✅ **Model Configuration**
+   - Architecture: YOLOv8s
+   - Input size: 416×416
+   - Output: 7 classes
+   - Inference speed: ~10ms per image
+
+---
+
+## 🎯 **PART 10: Challenges Faced by Kedar**
+
+### **A. Training Challenges**
+
+```python
 # 1. LONG TRAINING TIME
 Problem: 100 epochs × 15 min = 25 hours on CPU
 Solution: Used AMP (mixed precision) to speed up
@@ -713,7 +850,11 @@ Solution: Validation set monitoring, early stopping
 # 5. HYPERPARAMETER TUNING
 Problem: Which learning rate? Which batch size?
 Solution: Used YOLOv8 auto-configuration
-B. Solutions Implemented
+```
+
+### **B. Solutions Implemented**
+
+```python
 # Kedar's optimization strategies:
 
 # 1. Transfer Learning
@@ -735,3 +876,24 @@ B. Solutions Implemented
 # 5. Validation Monitoring
 # Track mAP every epoch
 # Save best model automatically
+```
+
+---
+
+## 📝 **Summary: Why Kedar's Work is Critical**
+
+```python
+# Without Kedar's work:
+❌ No trained model → Cannot detect fractures
+❌ Random weights → Useless predictions
+❌ No optimization → Poor accuracy
+❌ No validation → Don't know if model works
+
+# With Kedar's work:
+✅ Trained model → Can detect 7 fracture types
+✅ Learned weights → 28.1% mAP accuracy
+✅ Optimized training → Efficient learning
+✅ Validated model → Know strengths/weaknesses
+✅ Production-ready → Can deploy to app.py
+```
+
