@@ -1,451 +1,508 @@
-# 👥 PROJECT CONTRIBUTION DISTRIBUTION - Detailed Explanation
+I'll analyze the entire project and create a contribution breakdown focused on data structures. Let me examine the codebase systematically:
+
+Now let me create a comprehensive contribution breakdown based on the project structure and focusing on data structures:
+
+## **📊 PROJECT CONTRIBUTION BREAKDOWN**
+### **Idea Evolution Tracker - Data Structures Focused Analysis**
 
 ---
 
-## 🎯 OVERVIEW
+## **🎯 PROJECT OVERVIEW**
 
-This project uses **5 advanced data structures** to optimize different types of queries. Each team member owns one data structure completely.
-
-**Why use data structures instead of just database?**
-- Database queries are O(n) - check every record
-- Data structures are O(log n) or O(1) - much faster
-- Pre-built indexes reused for all queries
-- Supports complex operations databases can't do efficiently
-
----
-
-## 📊 DISTRIBUTION SUMMARY
-
-| Person | Data Structure | Primary Use Case | Query Speed | Files to Implement |
-|--------|---------------|------------------|-------------|-------------------|
-| **Kedar** | Interval Tree | Time range queries | O(log n + k) | 3 files |
-| **Sahil** | Segment Tree | Complexity range queries | O(log n) | 3 files |
-| **Shrinivas** | Trie (Prefix Tree) | Autocomplete search | O(m) | 3 files |
-| **Atharva** | BST (AVL Tree) | Sorted operations | O(log n) | 3 files |
-| **Nandika** | Hash Table | Fast ID lookups | O(1) | 3 files |
+**Total Components:**
+- 3 Core Data Structures (Interval Tree, Segment Tree, Lineage Graph)
+- 10 Backend Services
+- 40+ API Endpoints
+- 20+ Frontend Components
+- 20+ Utility Scripts
+- 2 Main Features (Evolution Tracker + Yugas)
 
 ---
 
-## 1️⃣ KEDAR - INTERVAL TREE
-
-### 🎯 Problem Solved
-**Query**: "Find all ideas that existed between 3000 BCE and 500 CE"
-
-**Why not database?**
-```sql
--- This checks EVERY idea, EVERY Yuga (440 checks)
-SELECT * FROM ideas WHERE 
-  (satya_start <= 500 AND satya_end >= -3000) OR
-  (treta_start <= 500 AND treta_end >= -3000) OR
-  (dwapar_start <= 500 AND dwapar_end >= -3000) OR
-  (kali_start <= 500 AND kali_end >= -3000)
-```
-
-**With Interval Tree**: Only ~9 comparisons (log₂(440) ≈ 9)
-
-### 📁 Files to Implement
-
-**1. `backend/data_structures/interval_tree.py`** (~400 lines)
-- `class IntervalNode`: Node with start, end, max_end, left, right
-- `class IntervalTree`: Main tree with insert, query, delete methods
-- **Key Methods**:
-  - `insert(start, end, data)`: Add time interval
-  - `query(start, end)`: Find overlapping intervals
-  - `delete(start, end)`: Remove interval
-  - `_balance()`: Keep tree balanced
-
-**2. `backend/services/yuga_data_structures.py`** (Lines 50-150)
-- `_build_interval_tree()`: Build tree from 110 ideas × 4 Yugas = 440 intervals
-- `query_time_period(start_year, end_year)`: Query wrapper
-- `_parse_time_period(time_string)`: Parse "10,000 BCE - 5,000 BCE"
-
-**3. `backend/tests/test_interval_tree.py`** (~200 lines)
-- Test insertion, querying, deletion
-- Test edge cases (overlapping, non-overlapping)
-- Performance tests
-
-### 🔗 API Integration
-**Endpoint**: `POST /api/yugas/query/time-period`
-```json
-Request: {"start_year": -3000, "end_year": 500}
-Response: {"ideas": [...], "count": 45}
-```
-
-### 📊 How It Works
-```
-Tree Structure (simplified):
-                [-10000, -5000]
-               /                \
-        [-8000, -3000]      [-4000, 1000]
-        /            \
-  [-9000, -7000]  [-6000, -2000]
-
-Query [-3000, 500]:
-1. Check root: overlaps? Yes
-2. Check left: max_end >= -3000? Yes, recurse
-3. Check right: start <= 500? Yes, recurse
-4. Return all overlapping intervals
-```
-
-**Total Lines**: ~600 lines across 3 files
+## **👥 SUGGESTED CONTRIBUTION DIVISION**
 
 ---
 
-## 2️⃣ SAHIL - SEGMENT TREE
+## **1️⃣ KEDAR - Data Structures Core & Backend Architecture**
 
-### 🎯 Problem Solved
-**Query**: "Find all ideas with complexity score between 40 and 80"
+### **🔴 PRIMARY RESPONSIBILITY: Core Data Structures Implementation**
 
-**Why not database?**
-```sql
--- This scans ALL 110 ideas
-SELECT * FROM ideas WHERE complexity >= 40 AND complexity <= 80
-```
+#### **A. Interval Tree (Complete Implementation)**
+**Files:**
+- `backend/data_structures/interval_tree.py` (250 lines)
 
-**With Segment Tree**: Only ~7 comparisons (log₂(110) ≈ 7)
+**Components:**
+- ✅ `IntervalTreeNode` class with BST properties
+- ✅ `IntervalTree` class with insert/query operations
+- ✅ Recursive insertion maintaining BST property
+- ✅ Augmented `max_end` calculation
+- ✅ O(log n + k) query algorithm with pruning
+- ✅ Interval overlap detection logic
+- ✅ Tree invariant verification
 
-**Bonus**: Can also answer "What's the average/min/max complexity of ideas 20-50?" in O(log n)
-
-### 📁 Files to Implement
-
-**1. `backend/data_structures/segment_tree.py`** (~450 lines)
-- `class SegmentTreeNode`: Node with start, end, min, max, sum, left, right
-- `class SegmentTree`: Main tree with build, query, update methods
-- **Key Methods**:
-  - `build(values)`: Build tree from array of complexity scores
-  - `query_range(start, end)`: Get min/max/sum in range
-  - `update(index, value)`: Update single score
-  - `get_min(start, end)`: Get minimum in range
-  - `get_max(start, end)`: Get maximum in range
-
-**2. `backend/services/yuga_data_structures.py`** (Lines 151-250)
-- `_build_segment_tree()`: Build tree from 110 complexity scores
-- `query_complexity_range(min_score, max_score, yuga)`: Query wrapper
-- `_extract_complexity_score(yuga_data)`: Parse complexity from text
-
-**3. `backend/tests/test_segment_tree.py`** (~200 lines)
-- Test building, querying, updating
-- Test aggregate operations (min/max/sum)
-- Performance tests
-
-### 🔗 API Integration
-**Endpoint**: `POST /api/yugas/query/complexity`
-```json
-Request: {"min_score": 40, "max_score": 80, "yuga": "kali_yuga"}
-Response: {"ideas": [...], "count": 32, "avg_complexity": 62.5}
-```
-
-### 📊 How It Works
-```
-Tree Structure (values: [10, 50, 30, 80, 20, 60, 40, 90]):
-                [0-7: min=10, max=90, sum=380]
-               /                              \
-    [0-3: min=10, max=80]              [4-7: min=20, max=90]
-       /              \                    /              \
-[0-1: 10,50]    [2-3: 30,80]      [4-5: 20,60]    [6-7: 40,90]
-
-Query range [2, 5]:
-1. Check root: partial overlap, recurse both
-2. Left child [0-3]: partial overlap, recurse
-3. Right child [4-7]: partial overlap, recurse
-4. Combine results: min=20, max=80, sum=190
-```
-
-**Total Lines**: ~650 lines across 3 files
-
----
-
-## 3️⃣ SHRINIVAS - TRIE (PREFIX TREE)
-
-### 🎯 Problem Solved
-**Query**: "Find all ideas starting with 'Fir'" (autocomplete)
-
-**Why not database?**
-```sql
--- This scans ALL 110 ideas
-SELECT * FROM ideas WHERE name LIKE 'Fir%'
-```
-
-**With Trie**: Only checks length of search string (3 characters)
-
-### 📁 Files to Implement
-
-**1. `backend/data_structures/trie.py`** (~350 lines)
-- `class TrieNode`: Node with children dict, is_end_of_word, idea_data
-- `class Trie`: Main trie with insert, search, autocomplete methods
-- **Key Methods**:
-  - `insert(word, idea_data)`: Add idea name
-  - `search(word)`: Exact search
-  - `starts_with(prefix)`: Find all with prefix
-  - `autocomplete(prefix, limit)`: Get top suggestions
-  - `delete(word)`: Remove idea
-
-**2. `backend/services/yuga_data_structures.py`** (Lines 251-350)
-- `_build_trie()`: Build trie from 110 idea names
-- `search_prefix(prefix)`: Search wrapper
-- `get_autocomplete(prefix, limit)`: Autocomplete wrapper
-
-**3. `backend/tests/test_trie.py`** (~200 lines)
-- Test insertion, searching, autocomplete
-- Test prefix matching
-- Performance tests
-
-### 🔗 API Integration
-**Endpoint**: `POST /api/yugas/search/prefix`
-```json
-Request: {"prefix": "Fir", "limit": 5}
-Response: {"suggestions": ["Fire", "Fireplace"], "count": 2}
-```
-
-### 📊 How It Works
-```
-Trie Structure:
-        root
-       /    \
-      F      W
-      |      |
-      i      h
-      |      |
-      r      e
-     / \     |
-    e   s    e
-    |   |    |
-   (Fire) (First) (Wheel)
-
-Search "Fir":
-1. Navigate: root → F → i → r
-2. Collect all words from this node
-3. Return: ["Fire", "First"]
-```
-
-**Total Lines**: ~550 lines across 3 files
-
----
-
-## 4️⃣ ATHARVA - BINARY SEARCH TREE (AVL)
-
-### 🎯 Problem Solved
-**Query**: "Get all ideas in alphabetical order" or "Find ideas between 'F' and 'W'"
-
-**Why not database?**
-```sql
--- This sorts ALL 110 ideas every time
-SELECT * FROM ideas ORDER BY name
--- Or range query scans all
-SELECT * FROM ideas WHERE name >= 'F' AND name <= 'W'
-```
-
-**With BST**: Already sorted, O(log n) for range queries
-
-### 📁 Files to Implement
-
-**1. `backend/data_structures/bst.py`** (~500 lines)
-- `class BSTNode`: Node with key, value, left, right, height
-- `class BinarySearchTree`: Main tree with insert, search, delete, balance methods
-- **Key Methods**:
-  - `insert(key, value)`: Add idea
-  - `search(key)`: Find idea by name
-  - `delete(key)`: Remove idea
-  - `get_sorted_ideas()`: In-order traversal
-  - `get_range(start, end)`: Range query
-  - `_balance()`: AVL balancing
-  - `_rotate_left()`, `_rotate_right()`: Rotations
-
-**2. `backend/services/yuga_data_structures.py`** (Lines 351-450)
-- `_build_bst()`: Build BST from 110 ideas
-- `get_sorted_ideas()`: Get all in order
-- `get_ideas_in_range(start, end)`: Range query wrapper
-
-**3. `backend/tests/test_bst.py`** (~250 lines)
-- Test insertion, deletion, searching
-- Test balancing (AVL properties)
-- Test range queries
-- Performance tests
-
-### 🔗 API Integration
-**Endpoint**: `POST /api/yugas/query/sorted`
-```json
-Request: {"start": "F", "end": "W", "limit": 20}
-Response: {"ideas": ["Fire", "Paper", "Wheel"], "count": 3}
-```
-
-### 📊 How It Works
-```
-BST Structure (balanced):
-           Paper
-          /     \
-       Fire    Wheel
-      /   \       \
-   Drill  Hammer  X-Ray
-
-In-order traversal: Drill, Fire, Hammer, Paper, Wheel, X-Ray
-Range query [F, W]: Fire, Hammer, Paper, Wheel
-```
-
-**Total Lines**: ~750 lines across 3 files
-
----
-
-## 5️⃣ NANDIKA - HASH TABLE
-
-### 🎯 Problem Solved
-**Query**: "Find idea by ID" or "Get all ideas in category 'Energy'"
-
-**Why not database?**
-```sql
--- This scans until found
-SELECT * FROM ideas WHERE id = '123'
--- Or scans all for category
-SELECT * FROM ideas WHERE category = 'Energy'
-```
-
-**With Hash Table**: O(1) average lookup time
-
-### 📁 Files to Implement
-
-**1. `backend/data_structures/hash_table.py`** (~450 lines)
-- `class HashNode`: Node with key, value, next (for chaining)
-- `class HashTable`: Main hash table with insert, search, delete methods
-- `class MultiIndexHashTable`: Multiple indexes (by ID, category, source)
-- **Key Methods**:
-  - `insert(key, value)`: Add key-value pair
-  - `search(key)`: Find by key (O(1))
-  - `delete(key)`: Remove key
-  - `_resize()`: Double capacity when needed
-  - `search_by_category(category)`: Get all in category
-  - `search_by_source(source)`: Get all from source
-
-**2. `backend/services/yuga_data_structures.py`** (Lines 451-550)
-- `_build_hash_table()`: Build hash table with multiple indexes
-- `search_by_id(idea_id)`: Fast ID lookup
-- `search_by_category(category)`: Category lookup
-- `get_statistics()`: Hash table stats
-
-**3. `backend/tests/test_hash_table.py`** (~200 lines)
-- Test insertion, searching, deletion
-- Test collision handling (chaining)
-- Test resizing
-- Test multiple indexes
-- Performance tests
-
-### 🔗 API Integration
-**Endpoint**: `POST /api/yugas/query/category`
-```json
-Request: {"category": "Energy"}
-Response: {"ideas": [...], "count": 15}
-```
-
-### 📊 How It Works
-```
-Hash Table Structure (capacity=10):
-Index 0: → [Fire, id=1] → [Furnace, id=11] → null
-Index 1: → null
-Index 2: → [Wheel, id=2] → null
-Index 3: → [Paper, id=3] → null
-...
-
-Search "Fire":
-1. Hash("Fire") = 0
-2. Go to index 0
-3. Check chain: Fire found!
-4. Return in O(1) average
-```
-
-**Total Lines**: ~650 lines across 3 files
-
----
-
-## 📊 COMPLETE FILE STRUCTURE
-
-```
-backend/
-├── data_structures/
-│   ├── interval_tree.py          # Kedar (400 lines)
-│   ├── segment_tree.py           # Sahil (450 lines)
-│   ├── trie.py                   # Shrinivas (350 lines)
-│   ├── bst.py                    # Atharva (500 lines)
-│   └── hash_table.py             # Nandika (450 lines)
-│
-├── services/
-│   └── yuga_data_structures.py   # Integration (550 lines)
-│       ├── Lines 50-150:   Kedar (Interval Tree)
-│       ├── Lines 151-250:  Sahil (Segment Tree)
-│       ├── Lines 251-350:  Shrinivas (Trie)
-│       ├── Lines 351-450:  Atharva (BST)
-│       └── Lines 451-550:  Nandika (Hash Table)
-│
-└── tests/
-    ├── test_interval_tree.py     # Kedar (200 lines)
-    ├── test_segment_tree.py      # Sahil (200 lines)
-    ├── test_trie.py              # Shrinivas (200 lines)
-    ├── test_bst.py               # Atharva (250 lines)
-    └── test_hash_table.py        # Nandika (200 lines)
-```
-
----
-
-## 🎯 WORK DISTRIBUTION SUMMARY
-
-| Person | Total Lines | Files | Complexity | Estimated Time |
-|--------|-------------|-------|------------|----------------|
-| **Kedar** | ~600 | 3 | High | 2-3 days |
-| **Sahil** | ~650 | 3 | High | 2-3 days |
-| **Shrinivas** | ~550 | 3 | Medium-High | 2-3 days |
-| **Atharva** | ~750 | 3 | High | 3-4 days |
-| **Nandika** | ~650 | 3 | Medium-High | 2-3 days |
-
----
-
-## 🔗 HOW THEY WORK TOGETHER
-
-All 5 data structures are built once at startup and used together:
-
+**Key Algorithms:**
 ```python
-class YugaDataStructures:
-    def __init__(self, ideas):
-        # Build all 5 structures
-        self.interval_tree = IntervalTree()      # Kedar
-        self.segment_tree = SegmentTree()        # Sahil
-        self.trie = Trie()                       # Shrinivas
-        self.bst = BinarySearchTree()            # Atharva
-        self.hash_table = MultiIndexHashTable()  # Nandika
-        
-        self._build_all_structures(ideas)
+- _insert_recursive()      # BST insertion with augmentation
+- _query_recursive()       # Efficient overlap queries
+- _intervals_overlap()     # Overlap detection
+- verify_invariants()      # Tree validation
+```
 
-# Example: Complex query using multiple structures
-def find_popular_ancient_ideas():
-    # 1. Find ideas in time range (Interval Tree - Kedar)
-    time_results = interval_tree.query(-5000, -1000)
-    
-    # 2. Filter by complexity (Segment Tree - Sahil)
-    complex_ideas = segment_tree.query_range(50, 100)
-    
-    # 3. Get sorted list (BST - Atharva)
-    sorted_ideas = bst.get_sorted_ideas()
-    
-    # 4. Fast lookup details (Hash Table - Nandika)
-    details = [hash_table.search(id) for id in sorted_ideas]
-    
-    return details
+**Complexity Analysis:**
+- Insert: O(log n)
+- Query: O(log n + k)
+- Space: O(n)
+
+---
+
+#### **B. Segment Tree (Complete Implementation)**
+**Files:**
+- `backend/data_structures/segment_tree.py` (300 lines)
+
+**Components:**
+- ✅ `SegmentTreeNode` class with range properties
+- ✅ `SegmentTree` class with range operations
+- ✅ Lazy propagation for batch updates
+- ✅ Range update and query methods
+- ✅ Point query optimization
+- ✅ Histogram generation
+
+**Key Algorithms:**
+```python
+- _build()                 # Recursive tree construction
+- _update_recursive()      # Range updates with lazy propagation
+- _query_recursive()       # Range sum queries
+- _push_down()            # Lazy propagation
+- get_peak_year()         # Peak detection
+- get_activity_histogram() # Histogram generation
+```
+
+**Complexity Analysis:**
+- Build: O(n)
+- Update: O(log n)
+- Query: O(log n)
+- Space: O(n)
+
+---
+
+#### **C. Backend Architecture**
+**Files:**
+- `backend/api.py` (1400+ lines) - Main API orchestration
+- `backend/models/__init__.py` - Model exports
+- `backend/data_structures/__init__.py` - DS exports
+
+**Responsibilities:**
+- ✅ API endpoint design and routing
+- ✅ Data structure initialization on startup
+- ✅ Integration of all 3 data structures
+- ✅ Error handling and validation
+- ✅ Response formatting
+
+**API Endpoints Managed:**
+```python
+# Temporal queries using data structures
+/api/temporal/query          # Interval Tree
+/api/temporal/count          # Segment Tree
+/api/temporal/histogram      # Segment Tree
+
+# Yugas data structure endpoints
+/api/yugas/query/time-period      # Interval Tree
+/api/yugas/query/complexity       # Segment Tree
+/api/yugas/evolution-chain        # Lineage Graph
+/api/yugas/data-structures/stats  # All DS stats
+```
+
+**Lines of Code:** ~2000 lines
+**Complexity:** High (Core infrastructure)
+
+---
+
+## **2️⃣ SAHIL - Lineage Graph & Graph Algorithms**
+
+### **🟢 PRIMARY RESPONSIBILITY: Graph Data Structure & Analysis**
+
+#### **A. Lineage Graph Implementation**
+**Files:**
+- `backend/services/lineage_graph.py` (350 lines)
+
+**Components:**
+- ✅ `LineageGraph` class wrapping NetworkX DiGraph
+- ✅ Node and edge management
+- ✅ Ancestor/descendant traversal
+- ✅ Path finding algorithms
+- ✅ Centrality analysis (PageRank)
+- ✅ Cycle detection
+- ✅ DAG validation
+
+**Key Algorithms:**
+```python
+- add_idea()              # Node insertion
+- add_influence()         # Edge creation
+- get_ancestors()         # Backward traversal
+- get_descendants()       # Forward traversal
+- find_evolution_path()   # Shortest path (BFS)
+- get_influence_centrality() # PageRank
+- detect_cycles()         # Cycle detection
+- is_dag()               # DAG validation
+```
+
+**Graph Operations:**
+- Traversal: O(V + E)
+- Path Finding: O(V + E)
+- Centrality: O(V * E)
+
+---
+
+#### **B. AI Prediction Service**
+**Files:**
+- `backend/services/ai_prediction.py` (400 lines)
+
+**Components:**
+- ✅ TF-IDF similarity matching
+- ✅ Multi-feature dormancy detection
+- ✅ Evolution forecasting with ML
+- ✅ Graph-structural features extraction
+- ✅ RandomForest classifier integration
+
+**Key Algorithms:**
+```python
+- get_similar_ideas()     # TF-IDF cosine similarity
+- _dormancy_score()       # Multi-feature scoring
+- _graph_features()       # Centrality, clustering
+- forecast_idea()         # ML-based prediction
+- get_prediction_overview() # Dashboard aggregation
+```
+
+**Machine Learning:**
+- TF-IDF vectorization
+- Cosine similarity
+- RandomForest classification
+- Feature engineering from graph
+
+---
+
+#### **C. Graph Visualization Backend**
+**Files:**
+- `backend/scripts/generate_edges.py`
+- `backend/scripts/build_connections.py`
+- `backend/scripts/regenerate_edges.py`
+
+**Responsibilities:**
+- ✅ Edge generation algorithms
+- ✅ Connection building logic
+- ✅ Graph data preparation for frontend
+
+**Lines of Code:** ~800 lines
+**Complexity:** High (Graph theory + ML)
+
+---
+
+## **3️⃣ NANDIKA - Yuga Data Structures Integration & Services**
+
+### **🔵 PRIMARY RESPONSIBILITY: Data Structures Application Layer**
+
+#### **A. Yuga Data Structures Service**
+**Files:**
+- `backend/services/yuga_data_structures.py` (400 lines)
+
+**Components:**
+- ✅ Integration of all 3 data structures
+- ✅ Complexity score calculation algorithm
+- ✅ Year mapping for historical periods
+- ✅ Data structure loading and initialization
+- ✅ Evolution chain detection
+- ✅ Query orchestration
+
+**Key Algorithms:**
+```python
+- calculate_complexity_score()  # 3-component scoring
+- _map_year_to_range()         # Historical year mapping
+- load_ideas()                 # DS initialization
+- query_by_time_period()       # Interval Tree query
+- query_by_complexity_range()  # Segment Tree query
+- get_evolution_chain()        # Graph traversal
+- _detect_evolution_chains()   # Pattern matching
+```
+
+**Complexity Score Formula:**
+```
+Score = Energy(40) + Technology(30) + Knowledge(30)
 ```
 
 ---
 
-## ✅ WHAT EACH PERSON NEEDS TO DO
+#### **B. MongoDB Service**
+**Files:**
+- `backend/services/mongodb_service.py` (250 lines)
 
-### For Everyone:
-1. **Implement your data structure** in `backend/data_structures/[your_file].py`
-2. **Integrate it** in `backend/services/yuga_data_structures.py` (your section)
-3. **Write tests** in `backend/tests/test_[your_structure].py`
-4. **Document your code** with comments explaining the algorithm
-5. **Test with real data** (110 ideas from the database)
+**Components:**
+- ✅ MongoDB connection management
+- ✅ CRUD operations for Yugas
+- ✅ JSON fallback storage
+- ✅ Data export functionality
+- ✅ Statistics aggregation
 
-### Existing Files to Read:
-- `backend/data_structures/interval_tree.py` - Already implemented (reference)
-- `backend/data_structures/segment_tree.py` - Already implemented (reference)
-- `backend/services/yuga_data_structures.py` - See how structures are integrated
-- `backend/api.py` - See how API endpoints use the structures
+**Key Methods:**
+```python
+- insert_idea()           # Upsert with fallback
+- get_all_ideas()         # Batch retrieval
+- get_idea_by_name()      # Single lookup
+- export_to_csv()         # Data export
+- get_stats()            # Aggregation
+```
 
 ---
 
-This distribution ensures everyone has equal, meaningful work with clear ownership and no overlap!
+#### **C. Yuga Generator Service**
+**Files:**
+- `backend/services/yuga_generator.py` (800 lines)
+
+**Components:**
+- ✅ LLM integration (OpenRouter)
+- ✅ Wikipedia/Wikimedia API integration
+- ✅ Image fetching with timeout
+- ✅ Rich content generation
+- ✅ Fallback template system
+
+**Key Features:**
+```python
+- generate_yuga_evolution()    # LLM generation
+- fetch_images_for_idea()      # Image fetching
+- create_yuga_record()         # Complete record
+- _enhance_with_rich_content() # Post-processing
+```
+
+**Lines of Code:** ~1450 lines
+**Complexity:** High (Integration + Algorithms)
+
+---
+
+## **4️⃣ SHRINIVAS - Frontend Data Visualization & UI**
+
+### **🟡 PRIMARY RESPONSIBILITY: Data Structure Visualization**
+
+#### **A. Graph Visualization Components**
+**Files:**
+- `frontend/src/components/ConnectionGraph.tsx`
+- `frontend/src/components/EvolutionPathFinder.tsx`
+- `frontend/src/components/FullPageTreeMap.tsx`
+- `frontend/src/components/TreeMapVisualizer/`
+
+**Components:**
+- ✅ Force-directed graph visualization (D3)
+- ✅ Interactive node selection
+- ✅ Path highlighting
+- ✅ Tree map for hierarchical data
+- ✅ Real-time graph updates
+
+**Technologies:**
+- React Force Graph 2D
+- D3.js
+- Canvas rendering
+- WebGL acceleration
+
+---
+
+#### **B. Yugas Evolution Page**
+**Files:**
+- `frontend/src/pages/YugasEvolution.tsx` (500+ lines)
+
+**Components:**
+- ✅ Yuga timeline visualization
+- ✅ Complexity score filters
+- ✅ Time period filters
+- ✅ Evolution chain display
+- ✅ Rich content rendering
+
+**Data Structure Integration:**
+```typescript
+// Interval Tree queries
+queryByTimePeriod(startYear, endYear)
+
+// Segment Tree queries
+queryByComplexity(minScore, maxScore)
+
+// Lineage Graph queries
+getEvolutionChain(ideaName)
+```
+
+---
+
+#### **C. Dashboard & Analytics**
+**Files:**
+- `frontend/src/components/StatsCards.tsx`
+- `frontend/src/components/YearChart.tsx`
+- `frontend/src/pages/EvolutionTracker.tsx`
+
+**Components:**
+- ✅ Real-time statistics
+- ✅ Chart visualizations (Recharts)
+- ✅ Category filters
+- ✅ Search functionality
+
+**Lines of Code:** ~1500 lines
+**Complexity:** Medium-High (Visualization)
+
+---
+
+## **5️⃣ ATHARVA - Data Models, Validation & Utilities**
+
+### **🟣 PRIMARY RESPONSIBILITY: Data Layer & Supporting Services**
+
+#### **A. Data Models**
+**Files:**
+- `backend/models/idea_node.py` (100 lines)
+- `backend/models/influence_edge.py` (80 lines)
+- `backend/models/evolution_stage.py` (60 lines)
+- `backend/models/validation.py` (200 lines)
+
+**Components:**
+- ✅ `IdeaNode` dataclass with validation
+- ✅ `InfluenceEdge` dataclass
+- ✅ `EvolutionStage` enum
+- ✅ Comprehensive validation functions
+- ✅ Type safety and constraints
+
+**Validation Rules:**
+```python
+- validate_idea_node()      # 15+ validation rules
+- validate_influence_edge() # Edge constraints
+- validate_time_period()    # Temporal validation
+```
+
+---
+
+#### **B. Data Store Service**
+**Files:**
+- `backend/services/data_store.py` (300 lines)
+
+**Components:**
+- ✅ JSON-based persistence
+- ✅ CRUD operations
+- ✅ File I/O management
+- ✅ Data integrity checks
+- ✅ Statistics aggregation
+
+**Key Methods:**
+```python
+- add_idea()              # Create
+- get_idea()              # Read
+- update_idea()           # Update
+- delete_idea()           # Delete
+- get_ideas_by_stage()    # Filter
+```
+
+---
+
+#### **C. Supporting Services**
+**Files:**
+- `backend/services/dataset_exporter.py` (200 lines)
+- `backend/services/nlp_extractor.py` (300 lines)
+- `backend/services/llm_summarizer.py` (150 lines)
+
+**Components:**
+- ✅ CSV/JSON export
+- ✅ NLP keyword extraction
+- ✅ Stage classification
+- ✅ LLM summarization
+- ✅ Metadata generation
+
+---
+
+#### **D. Utility Scripts**
+**Files:**
+- `backend/scripts/fetch_openalex.py`
+- `backend/scripts/bulk_generate_yugas.py`
+- `backend/scripts/cleanup_nonsense_ideas.py`
+- `backend/scripts/complete_all_rich_content.py`
+- Multiple data processing scripts
+
+**Responsibilities:**
+- ✅ Data fetching from OpenAlex API
+- ✅ Bulk data generation
+- ✅ Data cleaning and normalization
+- ✅ Content enrichment
+
+**Lines of Code:** ~1200 lines
+**Complexity:** Medium (Data processing)
+
+---
+
+## **📊 CONTRIBUTION SUMMARY TABLE**
+
+| Team Member | Primary Focus | Lines of Code | Complexity | Key Deliverables |
+|-------------|--------------|---------------|------------|------------------|
+| **KEDAR** | Interval Tree + Segment Tree + API | ~2000 | ⭐⭐⭐⭐⭐ | 2 Core DS, 40+ endpoints |
+| **SAHIL** | Lineage Graph + AI/ML | ~800 | ⭐⭐⭐⭐⭐ | Graph DS, Predictions |
+| **NANDIKA** | DS Integration + Yugas | ~1450 | ⭐⭐⭐⭐ | Integration layer, MongoDB |
+| **SHRINIVAS** | Frontend Visualization | ~1500 | ⭐⭐⭐⭐ | Graph UI, Yugas page |
+| **ATHARVA** | Models + Validation + Utils | ~1200 | ⭐⭐⭐ | Data layer, Scripts |
+
+---
+
+## **🎯 DATA STRUCTURES CONTRIBUTION BREAKDOWN**
+
+### **Interval Tree (100%)**
+- **KEDAR**: 100% - Complete implementation
+
+### **Segment Tree (100%)**
+- **KEDAR**: 100% - Complete implementation
+
+### **Lineage Graph (100%)**
+- **SAHIL**: 100% - Complete implementation
+
+### **Data Structures Integration (100%)**
+- **NANDIKA**: 70% - Yuga DS service, complexity scoring
+- **KEDAR**: 30% - API integration, initialization
+
+### **Data Structures Visualization (100%)**
+- **SHRINIVAS**: 80% - Graph visualization, UI
+- **SAHIL**: 20% - Graph data preparation
+
+---
+
+## **🏆 COMPLEXITY RANKING**
+
+1. **KEDAR** - Highest (2 core DS + backend architecture)
+2. **SAHIL** - Highest (Graph DS + ML algorithms)
+3. **NANDIKA** - High (DS integration + complex scoring)
+4. **SHRINIVAS** - High (Advanced visualizations)
+5. **ATHARVA** - Medium (Data layer + utilities)
+
+---
+
+## **💡 RECOMMENDED PRESENTATION DIVISION**
+
+### **KEDAR:**
+- Explain Interval Tree internals (BST + augmentation)
+- Demonstrate O(log n + k) query performance
+- Show Segment Tree with lazy propagation
+- API architecture overview
+
+### **SAHIL:**
+- Explain Lineage Graph (DAG structure)
+- Demonstrate graph traversal algorithms
+- Show AI prediction with graph features
+- PageRank centrality analysis
+
+### **NANDIKA:**
+- Explain complexity score calculation
+- Show how all 3 DS work together
+- Demonstrate Yugas time period mapping
+- MongoDB integration
+
+### **SHRINIVAS:**
+- Live demo of graph visualization
+- Show data structure queries in action
+- Interactive filtering demonstration
+- UI/UX walkthrough
+
+### **ATHARVA:**
+- Data model validation
+- Data pipeline and scripts
+- Export functionality
+- Testing and quality assurance
+
+---
+
+This breakdown ensures **equal recognition** while highlighting each person's **unique contribution** to the data structures project! 🚀
